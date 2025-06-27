@@ -90,3 +90,40 @@ class TradingConfiguration(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.category} - {self.symbol}"
+
+class Broker(models.Model):
+    user = models.ForeignKey(Registration, on_delete=models.CASCADE, related_name='brokers')
+    mt5_login = models.CharField(max_length=100)
+    mt5_password = models.CharField(max_length=128)  # Store hashed or encrypted in production
+    mt5_server = models.CharField(max_length=100)
+    broker_name = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.broker_name} - {self.mt5_login}"
+
+    class Meta:
+        verbose_name = "Broker"
+        verbose_name_plural = "Brokers"
+        ordering = ['-created_at']
+
+class TradeHistory(models.Model):
+    forgingkey = models.CharField(max_length=100, default="")  # Username stored as forgingkey
+    entry_time = models.DateTimeField()
+    symbol = models.CharField(max_length=20)
+    type = models.CharField(max_length=20)
+    quantity = models.DecimalField(max_digits=12, decimal_places=4)
+    entry_price = models.DecimalField(max_digits=16, decimal_places=4)
+    exit_time = models.DateTimeField()
+    exit_price = models.DecimalField(max_digits=16, decimal_places=4)
+    pl = models.DecimalField(max_digits=16, decimal_places=4)
+    cpl = models.DecimalField(max_digits=16, decimal_places=4)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.forgingkey} | {self.symbol} | {self.type} | {self.entry_time}"
+
+    class Meta:
+        verbose_name = "Trade History"
+        verbose_name_plural = "Trade Histories"
+        ordering = ['-created_at']

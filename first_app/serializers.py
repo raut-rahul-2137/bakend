@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Registration, TradingConfiguration, Contact, Franchise
+from .models import Registration, TradingConfiguration, Contact, Franchise, Broker, TradeHistory
 from django.contrib.auth.hashers import make_password
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -31,4 +31,14 @@ class ContactSerializer(serializers.ModelSerializer):
 class FranchiseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Franchise
-        fields = ['name', 'email', 'phone', 'message'] 
+        fields = ['name', 'email', 'phone', 'message']
+
+class BrokerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Broker
+        fields = ['user', 'mt5_login', 'mt5_password', 'mt5_server', 'broker_name', 'created_at']
+
+class TradeHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TradeHistory
+        fields = '__all__' 

@@ -29,7 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
      "mba-clinics-millennium-is.trycloudflare.com ",
 
-    "bidding-compute-mar-fu.trycloudflare.com",
+    "misc-course-launch-optional.trycloudflare.com ",
     "127.0.0.1",
     "http://localhost:8080/",
     "*",  # Allow all hosts

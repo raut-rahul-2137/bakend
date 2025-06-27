@@ -2,11 +2,12 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import check_password
-from .models import Registration, TradingConfiguration, Contact, Franchise
-from .serializers import RegistrationSerializer, TradingConfigurationSerializer, ContactSerializer, FranchiseSerializer
+from .models import Registration, TradingConfiguration, Contact, Franchise, Broker, TradeHistory
+from .serializers import RegistrationSerializer, TradingConfigurationSerializer, ContactSerializer, FranchiseSerializer, BrokerSerializer, TradeHistorySerializer
 import json
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import status
 
 # Create your views here.
 
@@ -238,3 +239,43 @@ def check_admin(request, user_id):
         return Response({
             'is_admin': False
         }, status=404)
+
+@csrf_exempt
+def broker_submit(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            serializer = BrokerSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({'message': 'Broker data saved successfully!'})
+            return JsonResponse(serializer.errors, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@csrf_exempt
+def get_brokers(request):
+    if request.method == 'GET':
+        user_id = request.GET.get('user_id')
+        if not user_id:
+            return JsonResponse({'error': 'User ID is required'}, status=400)
+        brokers = Broker.objects.filter(user_id=user_id)
+        serializer = BrokerSerializer(brokers, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@api_view(['GET', 'POST'])
+def trade_history_by_user(request, forgingkey):
+    if request.method == 'GET':
+        trades = TradeHistory.objects.filter(forgingkey=forgingkey).order_by('entry_time')
+        serializer = TradeHistorySerializer(trades, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        data = request.data.copy()
+        data['forgingkey'] = forgingkey
+        serializer = TradeHistorySerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
